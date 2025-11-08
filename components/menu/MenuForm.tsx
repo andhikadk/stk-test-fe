@@ -3,6 +3,7 @@
 import { Menu } from '@/types/menu';
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
+import { Input, Select, Checkbox, Button, IconButton, SelectOption } from '@/components/ui';
 
 interface MenuFormProps {
   selectedMenu: Menu | null;
@@ -112,148 +113,107 @@ export default function MenuForm({
 
   const availableParents = flattenMenus(allMenus, selectedMenu?.id);
 
+  const parentOptions: SelectOption[] = [
+    { value: '', label: 'None (Top Level)' },
+    ...availableParents.map(menu => ({
+      value: menu.id,
+      label: menu.title,
+    })),
+  ];
+
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 p-6">
+    <div className="bg-white rounded-lg border border-gray-200 p-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
-          {selectedMenu ? 'Edit Menu' : 'Create New Menu'}
+        <h3 className="text-lg font-semibold text-gray-800">
+          {selectedMenu && selectedMenu.id !== 0 ? 'Edit Menu' : 'Create New Menu'}
         </h3>
         {selectedMenu && (
-          <button
+          <IconButton
+            variant="ghost"
+            size="md"
+            icon={<X className="w-5 h-5" />}
             onClick={onCancel}
-            className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded"
             title="Cancel"
-          >
-            <X className="w-5 h-5 text-gray-500" />
-          </button>
+          />
         )}
       </div>
 
       {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Title */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Title <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            value={formData.title}
-            onChange={(e) => handleChange('title', e.target.value)}
-            className={`w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white
-              ${errors.title ? 'border-red-500' : 'border-gray-300 dark:border-gray-700'}
-              focus:outline-none focus:ring-2 focus:ring-blue-500`}
-            placeholder="e.g., Dashboard"
-          />
-          {errors.title && <p className="text-red-500 text-xs mt-1">{errors.title}</p>}
-        </div>
+        <Input
+          label="Title"
+          type="text"
+          required
+          value={formData.title}
+          onChange={(e) => handleChange('title', e.target.value)}
+          error={errors.title}
+          placeholder="e.g., Dashboard"
+        />
 
-        {/* Path */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Path <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            value={formData.path}
-            onChange={(e) => handleChange('path', e.target.value)}
-            className={`w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white
-              ${errors.path ? 'border-red-500' : 'border-gray-300 dark:border-gray-700'}
-              focus:outline-none focus:ring-2 focus:ring-blue-500`}
-            placeholder="e.g., /dashboard"
-          />
-          {errors.path && <p className="text-red-500 text-xs mt-1">{errors.path}</p>}
-        </div>
+        <Input
+          label="Path"
+          type="text"
+          required
+          value={formData.path}
+          onChange={(e) => handleChange('path', e.target.value)}
+          error={errors.path}
+          placeholder="e.g., /dashboard"
+        />
 
-        {/* Icon */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Icon <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            value={formData.icon}
-            onChange={(e) => handleChange('icon', e.target.value)}
-            className={`w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white
-              ${errors.icon ? 'border-red-500' : 'border-gray-300 dark:border-gray-700'}
-              focus:outline-none focus:ring-2 focus:ring-blue-500`}
-            placeholder="e.g., home or icon-home"
-          />
-          {errors.icon && <p className="text-red-500 text-xs mt-1">{errors.icon}</p>}
-          <p className="text-xs text-gray-500 mt-1">
-            Use Lucide icon name (e.g., home, settings, users)
-          </p>
-        </div>
+        <Input
+          label="Icon"
+          type="text"
+          required
+          value={formData.icon}
+          onChange={(e) => handleChange('icon', e.target.value)}
+          error={errors.icon}
+          placeholder="e.g., home or icon-home"
+          helperText="Use Lucide icon name (e.g., home, settings, users)"
+        />
 
-        {/* Parent Menu */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Parent Menu
-          </label>
-          <select
-            value={formData.parent_id || ''}
-            onChange={(e) => handleChange('parent_id', e.target.value ? Number(e.target.value) : null)}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">None (Top Level)</option>
-            {availableParents.map((menu) => (
-              <option key={menu.id} value={menu.id}>
-                {menu.title}
-              </option>
-            ))}
-          </select>
-        </div>
+        <Select
+          label="Parent Menu"
+          value={formData.parent_id || ''}
+          onChange={(e) => handleChange('parent_id', e.target.value ? Number(e.target.value) : null)}
+          options={parentOptions}
+        />
 
-        {/* Order Index */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Order Index
-          </label>
-          <input
-            type="number"
-            value={formData.order_index}
-            onChange={(e) => handleChange('order_index', Number(e.target.value))}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-            min="0"
-          />
-          <p className="text-xs text-gray-500 mt-1">
-            Lower numbers appear first
-          </p>
-        </div>
+        <Input
+          label="Order Index"
+          type="number"
+          value={formData.order_index}
+          onChange={(e) => handleChange('order_index', Number(e.target.value))}
+          helperText="Lower numbers appear first"
+          min="0"
+        />
 
-        {/* Is Active */}
-        <div className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            id="is_active"
-            checked={formData.is_active}
-            onChange={(e) => handleChange('is_active', e.target.checked)}
-            className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
-          />
-          <label htmlFor="is_active" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-            Active
-          </label>
-        </div>
+        <Checkbox
+          id="is_active"
+          label="Active"
+          checked={formData.is_active}
+          onChange={(e) => handleChange('is_active', e.target.checked)}
+        />
 
         {/* Buttons */}
         <div className="flex gap-3 pt-4">
-          <button
+          <Button
             type="submit"
-            disabled={isLoading}
-            className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            variant="primary"
+            isLoading={isLoading}
+            className="flex-1"
           >
-            {isLoading ? 'Saving...' : selectedMenu ? 'Update Menu' : 'Create Menu'}
-          </button>
+            {selectedMenu && selectedMenu.id !== 0 ? 'Update Menu' : 'Create Menu'}
+          </Button>
           {selectedMenu && (
-            <button
+            <Button
               type="button"
+              variant="outline"
               onClick={onCancel}
               disabled={isLoading}
-              className="px-4 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               Cancel
-            </button>
+            </Button>
           )}
         </div>
       </form>

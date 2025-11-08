@@ -11,13 +11,14 @@ export default function MobileMenuToggle({ isOpen, onToggle }: MobileMenuToggleP
   return (
     <button
       onClick={onToggle}
-      className="fixed top-4 left-4 z-50 p-2 rounded-lg bg-white dark:bg-gray-800 shadow-lg lg:hidden"
+      className="fixed top-4 left-4 z-50 p-2 rounded-lg shadow-lg lg:hidden"
+      style={{ backgroundColor: '#0051AF' }}
       aria-label={isOpen ? 'Close menu' : 'Open menu'}
     >
       {isOpen ? (
-        <X className="w-6 h-6 text-gray-700 dark:text-gray-300" />
+        <X className="w-6 h-6 text-white" />
       ) : (
-        <Menu className="w-6 h-6 text-gray-700 dark:text-gray-300" />
+        <Menu className="w-6 h-6 text-white" />
       )}
     </button>
   );
