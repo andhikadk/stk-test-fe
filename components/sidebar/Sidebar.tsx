@@ -1,18 +1,19 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { Menu } from '@/types/menu';
-import { getMenus } from '@/lib/api';
-import SidebarItem from './SidebarItem';
-import MobileMenuToggle from './MobileMenuToggle';
-import { useMenuContext } from '@/contexts/MenuContext';
-import Image from 'next/image';
+import { useEffect, useState } from "react";
+import { Menu } from "@/types/menu";
+import { getMenus } from "@/lib/api";
+import SidebarItem from "./SidebarItem";
+import MobileMenuToggle from "./MobileMenuToggle";
+import { useMenuContext } from "@/contexts/MenuContext";
+import Image from "next/image";
+import { PanelsTopLeft } from "lucide-react";
 
 export default function Sidebar() {
   const [menus, setMenus] = useState<Menu[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const { refreshTrigger } = useMenuContext();
+  const { refreshTrigger, isCollapsed, setIsCollapsed } = useMenuContext();
 
   useEffect(() => {
     const fetchMenus = async () => {
@@ -33,6 +34,10 @@ export default function Sidebar() {
     setIsOpen(false);
   };
 
+  const toggleCollapse = () => {
+    setIsCollapsed(!isCollapsed);
+  };
+
   return (
     <>
       {/* Mobile Menu Toggle */}
@@ -49,23 +54,33 @@ export default function Sidebar() {
       {/* Sidebar */}
       <aside
         className={`
-          fixed top-0 left-0 h-full w-64
-          transition-transform duration-300 ease-in-out z-40
-          ${isOpen ? 'translate-x-0' : '-translate-x-full'}
-          lg:translate-x-0 lg:static
+          fixed top-0 left-0 h-full
+          transition-all duration-300 ease-in-out z-40
+          ${isOpen ? "translate-x-0" : "-translate-x-full"}
+          ${isCollapsed ? "w-20" : "w-64"}
+          lg:translate-x-0 lg:m-4 lg:h-[calc(100vh-2rem)] lg:rounded-xl
         `}
-        style={{ backgroundColor: '#0051AF' }}
+        style={{ backgroundColor: "#0051AF" }}
       >
         <div className="flex flex-col h-full">
           {/* Sidebar Header */}
-          <div className="h-16 flex items-center px-6 border-b border-white/10">
-            <Image
-              src="/stk.svg"
-              alt="STK Logo"
-              width={70}
-              height={30}
-              priority
-            />
+          <div className="h-16 flex items-center justify-between px-6 border-b border-white/10">
+            {!isCollapsed && (
+              <Image
+                src="/stk.svg"
+                alt="STK Logo"
+                width={70}
+                height={30}
+                priority
+              />
+            )}
+            <button
+              onClick={toggleCollapse}
+              className="hidden lg:flex items-center justify-center w-8 h-8 rounded-lg hover:bg-white/10 transition-colors text-white"
+              aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            >
+              <PanelsTopLeft className="w-5 h-5" />
+            </button>
           </div>
 
           {/* Menu Items */}
@@ -81,7 +96,11 @@ export default function Sidebar() {
             ) : (
               <div className="space-y-1">
                 {menus.map((menu) => (
-                  <SidebarItem key={menu.id} menu={menu} />
+                  <SidebarItem
+                    key={menu.id}
+                    menu={menu}
+                    isCollapsed={isCollapsed}
+                  />
                 ))}
               </div>
             )}

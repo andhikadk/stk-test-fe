@@ -1,5 +1,5 @@
-import Link from 'next/link';
-import { ChevronRight, Home } from 'lucide-react';
+import Link from "next/link";
+import { ChevronRight, Home } from "lucide-react";
 
 export interface BreadcrumbItem {
   label: string;
@@ -17,12 +17,15 @@ export default function Breadcrumb({
   items,
   showHomeIcon = true,
   separator,
-  className = '',
+  className = "",
 }: BreadcrumbProps) {
   const defaultSeparator = <ChevronRight className="w-4 h-4 text-gray-400" />;
 
   return (
-    <nav aria-label="Breadcrumb" className={`flex items-center gap-2 ${className}`}>
+    <nav
+      aria-label="Breadcrumb"
+      className={`flex items-center gap-2 ${className}`}
+    >
       <ol className="flex items-center gap-2 flex-wrap">
         {showHomeIcon && (
           <>
@@ -57,9 +60,7 @@ export default function Breadcrumb({
               ) : (
                 <span
                   className={`text-sm ${
-                    isLast
-                      ? 'text-gray-900 font-medium'
-                      : 'text-gray-600'
+                    isLast ? "text-gray-900 font-medium" : "text-gray-600"
                   }`}
                 >
                   {item.label}

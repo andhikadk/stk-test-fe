@@ -2,7 +2,6 @@
 
 import { Menu } from "@/types/menu";
 import { ChevronRight, ChevronDown, Trash2, Plus } from "lucide-react";
-import { useState } from "react";
 import { IconButton } from "@/components/ui";
 
 interface MenuTreeProps {
@@ -11,6 +10,8 @@ interface MenuTreeProps {
   onSelectMenu: (menu: Menu) => void;
   onDeleteMenu: (menu: Menu) => void;
   onAddChild?: (parentMenu: Menu) => void;
+  expandedMenuIds?: Set<number>;
+  onToggleExpand?: (menuId: number) => void;
 }
 
 interface MenuTreeItemProps {
@@ -22,6 +23,8 @@ interface MenuTreeItemProps {
   onSelectMenu: (menu: Menu) => void;
   onDeleteMenu: (menu: Menu) => void;
   onAddChild?: (parentMenu: Menu) => void;
+  expandedMenuIds?: Set<number>;
+  onToggleExpand?: (menuId: number) => void;
 }
 
 function MenuTreeItem({
@@ -33,40 +36,30 @@ function MenuTreeItem({
   onSelectMenu,
   onDeleteMenu,
   onAddChild,
+  expandedMenuIds,
+  onToggleExpand,
 }: MenuTreeItemProps) {
-  const [isExpanded, setIsExpanded] = useState(true);
   const hasChildren = menu.children && menu.children.length > 0;
   const isSelected = selectedMenuId === menu.id;
+  const isExpanded = expandedMenuIds ? expandedMenuIds.has(menu.id) : true;
 
   return (
     <div className="relative">
       {/* Tree lines */}
-      <div className="flex items-center gap-1 group">
+      <div className="flex items-center gap-1 group relative">
         {/* Render vertical lines for parent levels */}
         {depth > 0 &&
           parentPath.map((shouldDrawLine, index) => (
-            <div key={index} className="w-5 flex justify-center">
+            <div key={index} className="w-4 flex justify-center">
               {shouldDrawLine && <div className="w-px h-full bg-gray-300" />}
             </div>
           ))}
 
-        {/* Current level connector */}
-        {depth > 0 && (
-          <div className="relative w-5 h-6 flex items-center">
-            {/* Vertical line */}
-            {!isLast && (
-              <div className="absolute left-1/2 top-0 w-px h-full bg-gray-300" />
-            )}
-            {/* Vertical line to middle */}
-            <div className="absolute left-1/2 top-0 w-px h-1/2 bg-gray-300" />
-            {/* Horizontal line */}
-            <div className="absolute left-1/2 top-1/2 w-full h-px bg-gray-300" />
-          </div>
-        )}
-
         {/* Expand/Collapse button */}
         <button
-          onClick={() => hasChildren && setIsExpanded(!isExpanded)}
+          onClick={() =>
+            hasChildren && onToggleExpand && onToggleExpand(menu.id)
+          }
           className={`shrink-0 ${!hasChildren ? "invisible" : ""}`}
         >
           {isExpanded ? (
@@ -75,6 +68,19 @@ function MenuTreeItem({
             <ChevronRight className="w-4 h-4 text-gray-500" />
           )}
         </button>
+
+        {/* Vertical line from chevron to children (only when expanded and has children and not last) */}
+        {hasChildren && isExpanded && !isLast && (
+          <div
+            className="absolute w-px bg-gray-300"
+            style={{
+              left: `${depth > 0 ? depth * 5 * 4 + 5 * 4 + 10 : 10}px`,
+              top: "100%",
+              height: "100%",
+              zIndex: -1,
+            }}
+          />
+        )}
 
         {/* Title */}
         <div
@@ -126,7 +132,7 @@ function MenuTreeItem({
 
       {/* Render children */}
       {hasChildren && isExpanded && (
-        <div>
+        <div className="relative">
           {menu.children!.map((child, index) => {
             const isLastChild = index === menu.children!.length - 1;
             return (
@@ -140,6 +146,8 @@ function MenuTreeItem({
                 onSelectMenu={onSelectMenu}
                 onDeleteMenu={onDeleteMenu}
                 onAddChild={onAddChild}
+                expandedMenuIds={expandedMenuIds}
+                onToggleExpand={onToggleExpand}
               />
             );
           })}
@@ -155,6 +163,8 @@ export default function MenuTree({
   onSelectMenu,
   onDeleteMenu,
   onAddChild,
+  expandedMenuIds,
+  onToggleExpand,
 }: MenuTreeProps) {
   return (
     <div className="space-y-0">
@@ -175,6 +185,8 @@ export default function MenuTree({
                 onSelectMenu={onSelectMenu}
                 onDeleteMenu={onDeleteMenu}
                 onAddChild={onAddChild}
+                expandedMenuIds={expandedMenuIds}
+                onToggleExpand={onToggleExpand}
               />
             </div>
           );

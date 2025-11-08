@@ -19,6 +19,7 @@ export default function MenusPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<Menu | null>(null);
+  const [expandedMenuIds, setExpandedMenuIds] = useState<Set<number>>(new Set());
   const { triggerRefresh } = useMenuContext();
 
   // Fetch all menus
@@ -114,6 +115,45 @@ export default function MenusPage() {
     setSelectedMenu(null);
   };
 
+  // Collect all menu IDs recursively
+  const collectAllMenuIds = (menuList: Menu[]): number[] => {
+    const ids: number[] = [];
+    const traverse = (items: Menu[]) => {
+      items.forEach((item) => {
+        ids.push(item.id);
+        if (item.children && item.children.length > 0) {
+          traverse(item.children);
+        }
+      });
+    };
+    traverse(menuList);
+    return ids;
+  };
+
+  // Handle expand all
+  const handleExpandAll = () => {
+    const allIds = collectAllMenuIds(menus);
+    setExpandedMenuIds(new Set(allIds));
+  };
+
+  // Handle collapse all
+  const handleCollapseAll = () => {
+    setExpandedMenuIds(new Set());
+  };
+
+  // Handle toggle expand for individual menu
+  const handleToggleExpand = (menuId: number) => {
+    setExpandedMenuIds((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(menuId)) {
+        newSet.delete(menuId);
+      } else {
+        newSet.add(menuId);
+      }
+      return newSet;
+    });
+  };
+
   return (
     <div className="h-full">
       {/* Breadcrumb */}
@@ -136,9 +176,27 @@ export default function MenusPage() {
         {/* Left: Menu Tree (40%) */}
         <div className="lg:col-span-2">
           <div className="bg-white rounded-lg border border-gray-200 p-4 h-[calc(100vh-16rem)] overflow-y-auto">
-            <h2 className="text-lg font-semibold text-gray-800 mb-4">
-              Tree Structure
-            </h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-gray-800">
+                Tree Structure
+              </h2>
+              <div className="flex gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleExpandAll}
+                >
+                  Expand All
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleCollapseAll}
+                >
+                  Collapse All
+                </Button>
+              </div>
+            </div>
             {isLoading ? (
               <div className="flex items-center justify-center py-12">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
@@ -150,6 +208,8 @@ export default function MenusPage() {
                 onSelectMenu={setSelectedMenu}
                 onDeleteMenu={handleDeleteMenu}
                 onAddChild={handleAddChild}
+                expandedMenuIds={expandedMenuIds}
+                onToggleExpand={handleToggleExpand}
               />
             )}
           </div>

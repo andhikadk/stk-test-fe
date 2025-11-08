@@ -9,7 +9,8 @@ export default function Home() {
           Welcome to Menu Manager
         </h1>
         <p className="text-lg text-gray-600">
-          A comprehensive menu management system with CRUD operations and hierarchical structure support.
+          A comprehensive menu management system with CRUD operations and
+          hierarchical structure support.
         </p>
       </div>
 
@@ -28,7 +29,8 @@ export default function Home() {
             </h2>
           </div>
           <p className="text-gray-600 mb-4">
-            Create, edit, and organize your application menus with an intuitive tree view interface.
+            Create, edit, and organize your application menus with an intuitive
+            tree view interface.
           </p>
           <ul className="space-y-2 text-sm text-gray-600">
             <li className="flex items-center gap-2">
@@ -56,32 +58,28 @@ export default function Home() {
             <div className="p-3 bg-gray-100 rounded-lg">
               <Settings className="w-8 h-8 text-gray-600" />
             </div>
-            <h2 className="text-2xl font-semibold text-gray-800">
-              Settings
-            </h2>
+            <h2 className="text-2xl font-semibold text-gray-800">Settings</h2>
           </div>
           <p className="text-gray-600 mb-4">
             Configure your application settings and preferences.
           </p>
-          <p className="text-sm text-gray-500 italic">
-            Coming soon...
-          </p>
+          <p className="text-sm text-gray-500 italic">Coming soon...</p>
         </div>
       </div>
 
       {/* Quick Stats */}
-      <div className="mt-8 p-6 bg-gradient-to-r from-primary-50 to-primary-100 rounded-lg border border-primary-200">
+      <div className="mt-8 p-6 bg-linear-to-r from-primary-50 to-primary-100 rounded-lg border border-primary-200">
         <h3 className="text-lg font-semibold text-gray-800 mb-2">
           Quick Start Guide
         </h3>
         <ol className="space-y-2 text-sm text-gray-700">
           <li className="flex items-start gap-2">
             <span className="font-bold text-primary-500">1.</span>
-            Click on "Menu Management" to access the CRUD interface
+            Click on &quot;Menu Management&quot; to access the CRUD interface
           </li>
           <li className="flex items-start gap-2">
             <span className="font-bold text-primary-500">2.</span>
-            Use "Add New Menu" button to create your first menu item
+            Use &quot;Add New Menu&quot; button to create your first menu item
           </li>
           <li className="flex items-start gap-2">
             <span className="font-bold text-primary-500">3.</span>

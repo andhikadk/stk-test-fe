@@ -2,8 +2,7 @@
 
 import { Menu } from '@/types/menu';
 import { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
-import { Input, Select, Checkbox, Button, IconButton, SelectOption } from '@/components/ui';
+import { Input, Select, Button, SelectOption } from '@/components/ui';
 
 interface MenuFormProps {
   selectedMenu: Menu | null;
@@ -24,7 +23,6 @@ export default function MenuForm({
     title: '',
     path: '',
     icon: '',
-    is_active: true,
     order_index: 0,
     parent_id: null as number | null,
   });
@@ -38,7 +36,6 @@ export default function MenuForm({
         title: selectedMenu.title,
         path: selectedMenu.path,
         icon: selectedMenu.icon,
-        is_active: selectedMenu.is_active,
         order_index: selectedMenu.order_index,
         parent_id: selectedMenu.parent_id,
       });
@@ -48,7 +45,6 @@ export default function MenuForm({
         title: '',
         path: '',
         icon: '',
-        is_active: true,
         order_index: 0,
         parent_id: null,
       });
@@ -87,7 +83,7 @@ export default function MenuForm({
     await onSubmit(formData);
   };
 
-  const handleChange = (field: string, value: any) => {
+  const handleChange = (field: string, value: string | number | null) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     // Clear error when user starts typing
     if (errors[field]) {
@@ -128,57 +124,55 @@ export default function MenuForm({
         <h3 className="text-lg font-semibold text-gray-800">
           {selectedMenu && selectedMenu.id !== 0 ? 'Edit Menu' : 'Create New Menu'}
         </h3>
-        {selectedMenu && (
-          <IconButton
-            variant="ghost"
-            size="md"
-            icon={<X className="w-5 h-5" />}
-            onClick={onCancel}
-            title="Cancel"
-          />
-        )}
       </div>
 
       {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-4">
-        <Input
-          label="Title"
-          type="text"
-          required
-          value={formData.title}
-          onChange={(e) => handleChange('title', e.target.value)}
-          error={errors.title}
-          placeholder="e.g., Dashboard"
-        />
+        {/* Row 1: Title + Path */}
+        <div className="grid grid-cols-2 gap-4">
+          <Input
+            label="Title"
+            type="text"
+            required
+            value={formData.title}
+            onChange={(e) => handleChange('title', e.target.value)}
+            error={errors.title}
+            placeholder="e.g., Dashboard"
+          />
 
-        <Input
-          label="Path"
-          type="text"
-          required
-          value={formData.path}
-          onChange={(e) => handleChange('path', e.target.value)}
-          error={errors.path}
-          placeholder="e.g., /dashboard"
-        />
+          <Input
+            label="Path"
+            type="text"
+            required
+            value={formData.path}
+            onChange={(e) => handleChange('path', e.target.value)}
+            error={errors.path}
+            placeholder="e.g., /dashboard"
+          />
+        </div>
 
-        <Input
-          label="Icon"
-          type="text"
-          required
-          value={formData.icon}
-          onChange={(e) => handleChange('icon', e.target.value)}
-          error={errors.icon}
-          placeholder="e.g., home or icon-home"
-          helperText="Use Lucide icon name (e.g., home, settings, users)"
-        />
+        {/* Row 2: Icon + Parent Menu */}
+        <div className="grid grid-cols-2 gap-4">
+          <Input
+            label="Icon"
+            type="text"
+            required
+            value={formData.icon}
+            onChange={(e) => handleChange('icon', e.target.value)}
+            error={errors.icon}
+            placeholder="e.g., home or icon-home"
+            helperText="Use Lucide icon name (e.g., home, settings, users)"
+          />
 
-        <Select
-          label="Parent Menu"
-          value={formData.parent_id || ''}
-          onChange={(e) => handleChange('parent_id', e.target.value ? Number(e.target.value) : null)}
-          options={parentOptions}
-        />
+          <Select
+            label="Parent Menu"
+            value={formData.parent_id || ''}
+            onChange={(e) => handleChange('parent_id', e.target.value ? Number(e.target.value) : null)}
+            options={parentOptions}
+          />
+        </div>
 
+        {/* Row 3: Order Index */}
         <Input
           label="Order Index"
           type="number"
@@ -186,13 +180,6 @@ export default function MenuForm({
           onChange={(e) => handleChange('order_index', Number(e.target.value))}
           helperText="Lower numbers appear first"
           min="0"
-        />
-
-        <Checkbox
-          id="is_active"
-          label="Active"
-          checked={formData.is_active}
-          onChange={(e) => handleChange('is_active', e.target.checked)}
         />
 
         {/* Buttons */}
