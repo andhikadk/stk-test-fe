@@ -7,11 +7,16 @@ import {
   createMenu,
   updateMenu,
   deleteMenu,
+  moveMenu,
+  reorderMenu,
 } from "@/lib/api";
 import MenuTree from "@/components/menu/MenuTree";
 import MenuForm from "@/components/menu/MenuForm";
 import { useMenuContext } from "@/contexts/MenuContext";
 import { Button, Modal, Breadcrumb } from "@/components/ui";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
+import { toast } from "sonner";
 
 export default function MenusPage() {
   const [menus, setMenus] = useState<Menu[]>([]);
@@ -30,7 +35,7 @@ export default function MenusPage() {
       setMenus(data);
     } catch (error) {
       console.error("Error fetching menus:", error);
-      alert("Failed to fetch menus");
+      toast.error("Failed to fetch menus");
     } finally {
       setIsLoading(false);
     }
@@ -47,13 +52,13 @@ export default function MenusPage() {
       if (selectedMenu && selectedMenu.id !== 0) {
         // Update existing menu
         await updateMenu(selectedMenu.id, data);
-        alert("Menu updated successfully!");
+        toast.success("Menu updated successfully!");
       } else {
         // Create new menu (including child menus)
         await createMenu(
           data as Omit<Menu, "id" | "created_at" | "updated_at" | "children">
         );
-        alert("Menu created successfully!");
+        toast.success("Menu created successfully!");
       }
 
       // Refresh menus and reset form
@@ -62,7 +67,7 @@ export default function MenusPage() {
       setSelectedMenu(null);
     } catch (error) {
       console.error("Error submitting menu:", error);
-      alert("Failed to save menu");
+      toast.error("Failed to save menu");
     } finally {
       setIsSubmitting(false);
     }
@@ -78,7 +83,7 @@ export default function MenusPage() {
 
     try {
       await deleteMenu(deleteConfirm.id);
-      alert("Menu deleted successfully!");
+      toast.success("Menu deleted successfully!");
 
       // Refresh menus and reset selection
       await fetchMenus();
@@ -88,7 +93,7 @@ export default function MenusPage() {
       }
     } catch (error) {
       console.error("Error deleting menu:", error);
-      alert("Failed to delete menu");
+      toast.error("Failed to delete menu");
     } finally {
       setDeleteConfirm(null);
     }
@@ -102,7 +107,6 @@ export default function MenusPage() {
       title: "",
       path: "",
       icon: "",
-      is_active: true,
       order_index: 0,
       parent_id: parentMenu.id,
       created_at: "",
@@ -154,6 +158,86 @@ export default function MenusPage() {
     });
   };
 
+  // Handle menu drag and drop
+  const handleMenuDrop = async (
+    draggedId: number,
+    targetId: number | null,
+    position: "before" | "after" | "inside"
+  ) => {
+    try {
+      // Find dragged menu
+      const findMenu = (menus: Menu[], id: number): Menu | null => {
+        for (const menu of menus) {
+          if (menu.id === id) return menu;
+          if (menu.children) {
+            const found = findMenu(menu.children, id);
+            if (found) return found;
+          }
+        }
+        return null;
+      };
+
+      const draggedMenu = findMenu(menus, draggedId);
+      if (!draggedMenu) return;
+
+      // Determine new parent and position
+      let newParentId: number | null = null;
+      let newIndex = 0;
+
+      if (position === "inside" && targetId !== null) {
+        // Dropped inside another menu - make it a child
+        newParentId = targetId;
+        // Find target menu's children count for new index
+        const targetMenu = findMenu(menus, targetId);
+        newIndex = targetMenu?.children?.length || 0;
+      } else {
+        // Dropped before/after - same parent as target
+        const targetMenu = targetId ? findMenu(menus, targetId) : null;
+        newParentId = targetMenu?.parent_id || null;
+
+        // Get siblings recursively from all menus
+        const getAllMenusFlat = (menuList: Menu[]): Menu[] => {
+          const result: Menu[] = [];
+          const traverse = (items: Menu[]) => {
+            items.forEach((item) => {
+              result.push(item);
+              if (item.children && item.children.length > 0) {
+                traverse(item.children);
+              }
+            });
+          };
+          traverse(menuList);
+          return result;
+        };
+
+        const allMenusFlat = getAllMenusFlat(menus);
+        const siblings = allMenusFlat.filter(
+          (m) => (m.parent_id || null) === newParentId && m.id !== draggedId
+        );
+        const targetIndex = siblings.findIndex((m) => m.id === targetId);
+        newIndex = position === "before" ? targetIndex : targetIndex + 1;
+      }
+
+      // Check if parent changed
+      const parentChanged = draggedMenu.parent_id !== newParentId;
+
+      if (parentChanged) {
+        await moveMenu(draggedId, newParentId);
+      }
+
+      // Always reorder to set correct position with old index for optimization
+      await reorderMenu(draggedId, newIndex, draggedMenu.order_index);
+
+      // Refresh menus
+      await fetchMenus();
+      triggerRefresh();
+      toast.success("Menu moved successfully!");
+    } catch (error) {
+      console.error("Error handling menu drop:", error);
+      toast.error("Failed to move menu");
+    }
+  };
+
   return (
     <div className="h-full">
       {/* Breadcrumb */}
@@ -202,15 +286,18 @@ export default function MenusPage() {
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
               </div>
             ) : (
-              <MenuTree
-                menus={menus}
-                selectedMenuId={selectedMenu?.id || null}
-                onSelectMenu={setSelectedMenu}
-                onDeleteMenu={handleDeleteMenu}
-                onAddChild={handleAddChild}
-                expandedMenuIds={expandedMenuIds}
-                onToggleExpand={handleToggleExpand}
-              />
+              <DndProvider backend={HTML5Backend}>
+                <MenuTree
+                  menus={menus}
+                  selectedMenuId={selectedMenu?.id || null}
+                  onSelectMenu={setSelectedMenu}
+                  onDeleteMenu={handleDeleteMenu}
+                  onAddChild={handleAddChild}
+                  expandedMenuIds={expandedMenuIds}
+                  onToggleExpand={handleToggleExpand}
+                  onMenuDrop={handleMenuDrop}
+                />
+              </DndProvider>
             )}
           </div>
         </div>

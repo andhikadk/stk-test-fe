@@ -3,7 +3,6 @@ export interface Menu {
   title: string;
   path: string;
   icon: string;
-  is_active: boolean;
   order_index: number;
   parent_id: number | null;
   children?: Menu[];

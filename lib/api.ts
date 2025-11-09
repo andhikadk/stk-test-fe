@@ -1,12 +1,12 @@
-import { Menu, ApiResponse } from '@/types/menu';
+import { Menu, ApiResponse } from "@/types/menu";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
 // Get all menus (for sidebar - only active)
 export async function getMenus(): Promise<Menu[]> {
   try {
     const response = await fetch(`${API_BASE_URL}/api/menus`, {
-      cache: 'no-store', // Disable caching for fresh data
+      cache: "no-store", // Disable caching for fresh data
     });
 
     if (!response.ok) {
@@ -15,19 +15,12 @@ export async function getMenus(): Promise<Menu[]> {
 
     const result: ApiResponse<Menu[]> = await response.json();
 
-    // Filter only active menus
-    const filterActiveMenus = (menus: Menu[]): Menu[] => {
-      return menus
-        .filter(menu => menu.is_active)
-        .map(menu => ({
-          ...menu,
-          children: menu.children ? filterActiveMenus(menu.children) : undefined,
-        }));
-    };
-
-    return filterActiveMenus(result.data);
+    return result.data.map((menu) => ({
+      ...menu,
+      children: menu.children ?? undefined,
+    }));
   } catch (error) {
-    console.error('Error fetching menus:', error);
+    console.error("Error fetching menus:", error);
     return [];
   }
 }
@@ -36,7 +29,7 @@ export async function getMenus(): Promise<Menu[]> {
 export async function getAllMenus(): Promise<Menu[]> {
   try {
     const response = await fetch(`${API_BASE_URL}/api/menus`, {
-      cache: 'no-store',
+      cache: "no-store",
     });
 
     if (!response.ok) {
@@ -46,7 +39,7 @@ export async function getAllMenus(): Promise<Menu[]> {
     const result: ApiResponse<Menu[]> = await response.json();
     return result.data;
   } catch (error) {
-    console.error('Error fetching all menus:', error);
+    console.error("Error fetching all menus:", error);
     return [];
   }
 }
@@ -55,7 +48,7 @@ export async function getAllMenus(): Promise<Menu[]> {
 export async function getMenuById(id: number): Promise<Menu | null> {
   try {
     const response = await fetch(`${API_BASE_URL}/api/menus/${id}`, {
-      cache: 'no-store',
+      cache: "no-store",
     });
 
     if (!response.ok) {
@@ -65,18 +58,20 @@ export async function getMenuById(id: number): Promise<Menu | null> {
     const result: ApiResponse<Menu> = await response.json();
     return result.data;
   } catch (error) {
-    console.error('Error fetching menu:', error);
+    console.error("Error fetching menu:", error);
     return null;
   }
 }
 
 // Create new menu
-export async function createMenu(data: Omit<Menu, 'id' | 'created_at' | 'updated_at' | 'children'>): Promise<Menu | null> {
+export async function createMenu(
+  data: Omit<Menu, "id" | "created_at" | "updated_at" | "children">
+): Promise<Menu | null> {
   try {
     const response = await fetch(`${API_BASE_URL}/api/menus`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(data),
     });
@@ -88,18 +83,21 @@ export async function createMenu(data: Omit<Menu, 'id' | 'created_at' | 'updated
     const result: ApiResponse<Menu> = await response.json();
     return result.data;
   } catch (error) {
-    console.error('Error creating menu:', error);
+    console.error("Error creating menu:", error);
     throw error;
   }
 }
 
 // Update menu
-export async function updateMenu(id: number, data: Partial<Omit<Menu, 'id' | 'created_at' | 'updated_at' | 'children'>>): Promise<Menu | null> {
+export async function updateMenu(
+  id: number,
+  data: Partial<Omit<Menu, "id" | "created_at" | "updated_at" | "children">>
+): Promise<Menu | null> {
   try {
     const response = await fetch(`${API_BASE_URL}/api/menus/${id}`, {
-      method: 'PUT',
+      method: "PUT",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(data),
     });
@@ -111,7 +109,7 @@ export async function updateMenu(id: number, data: Partial<Omit<Menu, 'id' | 'cr
     const result: ApiResponse<Menu> = await response.json();
     return result.data;
   } catch (error) {
-    console.error('Error updating menu:', error);
+    console.error("Error updating menu:", error);
     throw error;
   }
 }
@@ -120,7 +118,7 @@ export async function updateMenu(id: number, data: Partial<Omit<Menu, 'id' | 'cr
 export async function deleteMenu(id: number): Promise<boolean> {
   try {
     const response = await fetch(`${API_BASE_URL}/api/menus/${id}`, {
-      method: 'DELETE',
+      method: "DELETE",
     });
 
     if (!response.ok) {
@@ -129,20 +127,20 @@ export async function deleteMenu(id: number): Promise<boolean> {
 
     return true;
   } catch (error) {
-    console.error('Error deleting menu:', error);
+    console.error("Error deleting menu:", error);
     throw error;
   }
 }
 
 // Toggle menu active status
-export async function toggleMenuActive(id: number, isActive: boolean): Promise<Menu | null> {
+export async function toggleMenuActive(id: number): Promise<Menu | null> {
   try {
     const response = await fetch(`${API_BASE_URL}/api/menus/${id}`, {
-      method: 'PUT',
+      method: "PUT",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify({ is_active: isActive }),
+      body: JSON.stringify({}),
     });
 
     if (!response.ok) {
@@ -152,7 +150,63 @@ export async function toggleMenuActive(id: number, isActive: boolean): Promise<M
     const result: ApiResponse<Menu> = await response.json();
     return result.data;
   } catch (error) {
-    console.error('Error toggling menu active:', error);
+    console.error("Error toggling menu active:", error);
+    throw error;
+  }
+}
+
+// Move menu to different parent
+export async function moveMenu(
+  id: number,
+  parentId: number | null
+): Promise<Menu | null> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/menus/${id}/move`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ parent_id: parentId }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to move menu: ${response.statusText}`);
+    }
+
+    const result: ApiResponse<Menu> = await response.json();
+    return result.data;
+  } catch (error) {
+    console.error("Error moving menu:", error);
+    throw error;
+  }
+}
+
+// Reorder menu within same parent level
+export async function reorderMenu(
+  id: number,
+  newIndex: number,
+  oldIndex?: number
+): Promise<Menu | null> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/menus/${id}/reorder`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        new_index: newIndex,
+        ...(oldIndex !== undefined && { old_index: oldIndex }),
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to reorder menu: ${response.statusText}`);
+    }
+
+    const result: ApiResponse<Menu> = await response.json();
+    return result.data;
+  } catch (error) {
+    console.error("Error reordering menu:", error);
     throw error;
   }
 }
