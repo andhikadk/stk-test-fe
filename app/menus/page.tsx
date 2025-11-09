@@ -261,7 +261,7 @@ export default function MenusPage() {
         <div className="lg:col-span-2">
           <div className="bg-white rounded-lg border border-gray-200 p-4 h-[calc(100vh-16rem)] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-gray-800">
+              <h2 className="text-lg hidden sm:block font-semibold text-gray-800">
                 Tree Structure
               </h2>
               <div className="flex gap-2">

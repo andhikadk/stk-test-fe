@@ -4,16 +4,14 @@ import { useEffect, useState } from "react";
 import { Menu } from "@/types/menu";
 import { getMenus } from "@/lib/api";
 import SidebarItem from "./SidebarItem";
-import MobileMenuToggle from "./MobileMenuToggle";
 import { useMenuContext } from "@/contexts/MenuContext";
 import Image from "next/image";
 import { PanelsTopLeft } from "lucide-react";
 
 export default function Sidebar() {
   const [menus, setMenus] = useState<Menu[]>([]);
-  const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const { refreshTrigger, isCollapsed, setIsCollapsed } = useMenuContext();
+  const { refreshTrigger, isCollapsed, setIsCollapsed, isSidebarOpen, setIsSidebarOpen } = useMenuContext();
 
   useEffect(() => {
     const fetchMenus = async () => {
@@ -26,25 +24,25 @@ export default function Sidebar() {
     fetchMenus();
   }, [refreshTrigger]);
 
-  const toggleSidebar = () => {
-    setIsOpen(!isOpen);
-  };
-
   const closeSidebar = () => {
-    setIsOpen(false);
+    setIsSidebarOpen(false);
   };
 
-  const toggleCollapse = () => {
-    setIsCollapsed(!isCollapsed);
+  const toggleSidebarOrCollapse = () => {
+    // On mobile: close sidebar
+    // On desktop: toggle collapse
+    const isMobile = window.innerWidth < 1024; // lg breakpoint
+    if (isMobile) {
+      setIsSidebarOpen(false);
+    } else {
+      setIsCollapsed(!isCollapsed);
+    }
   };
 
   return (
     <>
-      {/* Mobile Menu Toggle */}
-      <MobileMenuToggle isOpen={isOpen} onToggle={toggleSidebar} />
-
       {/* Backdrop for mobile */}
-      {isOpen && (
+      {isSidebarOpen && (
         <div
           className="fixed inset-0 bg-black/50 z-30 lg:hidden"
           onClick={closeSidebar}
@@ -56,7 +54,7 @@ export default function Sidebar() {
         className={`
           fixed top-0 left-0 h-full
           transition-all duration-300 ease-in-out z-40
-          ${isOpen ? "translate-x-0" : "-translate-x-full"}
+          ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}
           ${isCollapsed ? "w-20" : "w-64"}
           lg:translate-x-0 lg:m-4 lg:h-[calc(100vh-2rem)] lg:rounded-xl
         `}
@@ -75,7 +73,7 @@ export default function Sidebar() {
               />
             )}
             <button
-              onClick={toggleCollapse}
+              onClick={toggleSidebarOrCollapse}
               className="hidden lg:flex items-center justify-center w-8 h-8 rounded-lg hover:bg-white/10 transition-colors text-white"
               aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
             >

@@ -81,6 +81,18 @@ export default function MenuForm({
     }
 
     await onSubmit(formData);
+
+    // Explicitly reset form after successful submission
+    if (!selectedMenu || selectedMenu.id === 0) {
+      setFormData({
+        title: '',
+        path: '',
+        icon: '',
+        order_index: 0,
+        parent_id: null,
+      });
+      setErrors({});
+    }
   };
 
   const handleChange = (field: string, value: string | number | null) => {
