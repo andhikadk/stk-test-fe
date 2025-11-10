@@ -24,7 +24,7 @@ export default function MenuForm({
     path: '',
     icon: '',
     order_index: 0,
-    parent_id: null as number | null,
+    parent_id: null as string | null,
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -83,7 +83,7 @@ export default function MenuForm({
     await onSubmit(formData);
 
     // Explicitly reset form after successful submission
-    if (!selectedMenu || selectedMenu.id === 0) {
+    if (!selectedMenu || selectedMenu.id === '') {
       setFormData({
         title: '',
         path: '',
@@ -104,7 +104,7 @@ export default function MenuForm({
   };
 
   // Flatten menus for parent selection (exclude current menu and its children)
-  const flattenMenus = (menus: Menu[], excludeId?: number): Menu[] => {
+  const flattenMenus = (menus: Menu[], excludeId?: string): Menu[] => {
     let result: Menu[] = [];
 
     for (const menu of menus) {
@@ -134,7 +134,7 @@ export default function MenuForm({
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-lg font-semibold text-gray-800">
-          {selectedMenu && selectedMenu.id !== 0 ? 'Edit Menu' : 'Create New Menu'}
+          {selectedMenu && selectedMenu.id !== '' ? 'Edit Menu' : 'Create New Menu'}
         </h3>
       </div>
 
@@ -179,7 +179,7 @@ export default function MenuForm({
           <Select
             label="Parent Menu"
             value={formData.parent_id || ''}
-            onChange={(e) => handleChange('parent_id', e.target.value ? Number(e.target.value) : null)}
+            onChange={(e) => handleChange('parent_id', e.target.value || null)}
             options={parentOptions}
           />
         </div>
@@ -202,7 +202,7 @@ export default function MenuForm({
             isLoading={isLoading}
             className="flex-1"
           >
-            {selectedMenu && selectedMenu.id !== 0 ? 'Update Menu' : 'Create Menu'}
+            {selectedMenu && selectedMenu.id !== '' ? 'Update Menu' : 'Create Menu'}
           </Button>
           {selectedMenu && (
             <Button

@@ -45,7 +45,7 @@ export async function getAllMenus(): Promise<Menu[]> {
 }
 
 // Get single menu by ID
-export async function getMenuById(id: number): Promise<Menu | null> {
+export async function getMenuById(id: string): Promise<Menu | null> {
   try {
     const response = await fetch(`${API_BASE_URL}/api/menus/${id}`, {
       cache: "no-store",
@@ -90,7 +90,7 @@ export async function createMenu(
 
 // Update menu
 export async function updateMenu(
-  id: number,
+  id: string,
   data: Partial<Omit<Menu, "id" | "created_at" | "updated_at" | "children">>
 ): Promise<Menu | null> {
   try {
@@ -115,7 +115,7 @@ export async function updateMenu(
 }
 
 // Delete menu
-export async function deleteMenu(id: number): Promise<boolean> {
+export async function deleteMenu(id: string): Promise<boolean> {
   try {
     const response = await fetch(`${API_BASE_URL}/api/menus/${id}`, {
       method: "DELETE",
@@ -133,7 +133,7 @@ export async function deleteMenu(id: number): Promise<boolean> {
 }
 
 // Toggle menu active status
-export async function toggleMenuActive(id: number): Promise<Menu | null> {
+export async function toggleMenuActive(id: string): Promise<Menu | null> {
   try {
     const response = await fetch(`${API_BASE_URL}/api/menus/${id}`, {
       method: "PUT",
@@ -157,8 +157,8 @@ export async function toggleMenuActive(id: number): Promise<Menu | null> {
 
 // Move menu to different parent
 export async function moveMenu(
-  id: number,
-  parentId: number | null
+  id: string,
+  parentId: string | null
 ): Promise<Menu | null> {
   try {
     const response = await fetch(`${API_BASE_URL}/api/menus/${id}/move`, {
@@ -183,7 +183,7 @@ export async function moveMenu(
 
 // Reorder menu within same parent level
 export async function reorderMenu(
-  id: number,
+  id: string,
   newIndex: number,
   oldIndex?: number
 ): Promise<Menu | null> {

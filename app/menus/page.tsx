@@ -24,7 +24,7 @@ export default function MenusPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<Menu | null>(null);
-  const [expandedMenuIds, setExpandedMenuIds] = useState<Set<number>>(new Set());
+  const [expandedMenuIds, setExpandedMenuIds] = useState<Set<string>>(new Set());
   const { triggerRefresh } = useMenuContext();
 
   // Fetch all menus
@@ -49,7 +49,7 @@ export default function MenusPage() {
   const handleSubmit = async (data: Partial<Menu>) => {
     setIsSubmitting(true);
     try {
-      if (selectedMenu && selectedMenu.id !== 0) {
+      if (selectedMenu && selectedMenu.id !== '') {
         // Update existing menu
         await updateMenu(selectedMenu.id, data);
         toast.success("Menu updated successfully!");
@@ -103,7 +103,7 @@ export default function MenusPage() {
   const handleAddChild = (parentMenu: Menu) => {
     // Pre-fill the form with parent_id
     setSelectedMenu({
-      id: 0,
+      id: '',
       title: "",
       path: "",
       icon: "",
@@ -120,8 +120,8 @@ export default function MenusPage() {
   };
 
   // Collect all menu IDs recursively
-  const collectAllMenuIds = (menuList: Menu[]): number[] => {
-    const ids: number[] = [];
+  const collectAllMenuIds = (menuList: Menu[]): string[] => {
+    const ids: string[] = [];
     const traverse = (items: Menu[]) => {
       items.forEach((item) => {
         ids.push(item.id);
@@ -146,7 +146,7 @@ export default function MenusPage() {
   };
 
   // Handle toggle expand for individual menu
-  const handleToggleExpand = (menuId: number) => {
+  const handleToggleExpand = (menuId: string) => {
     setExpandedMenuIds((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(menuId)) {
@@ -160,13 +160,13 @@ export default function MenusPage() {
 
   // Handle menu drag and drop
   const handleMenuDrop = async (
-    draggedId: number,
-    targetId: number | null,
+    draggedId: string,
+    targetId: string | null,
     position: "before" | "after" | "inside"
   ) => {
     try {
       // Find dragged menu
-      const findMenu = (menus: Menu[], id: number): Menu | null => {
+      const findMenu = (menus: Menu[], id: string): Menu | null => {
         for (const menu of menus) {
           if (menu.id === id) return menu;
           if (menu.children) {
@@ -181,7 +181,7 @@ export default function MenusPage() {
       if (!draggedMenu) return;
 
       // Determine new parent and position
-      let newParentId: number | null = null;
+      let newParentId: string | null = null;
       let newIndex = 0;
 
       if (position === "inside" && targetId !== null) {

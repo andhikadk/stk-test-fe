@@ -1,10 +1,10 @@
 export interface Menu {
-  id: number;
+  id: string;
   title: string;
   path: string;
   icon: string;
   order_index: number;
-  parent_id: number | null;
+  parent_id: string | null;
   children?: Menu[];
   created_at: string;
   updated_at: string;
