@@ -5,15 +5,15 @@ import MenuTreeItem from "./MenuTreeItem";
 
 interface MenuTreeProps {
   menus: Menu[];
-  selectedMenuId: number | null;
+  selectedMenuId: string | null;
   onSelectMenu: (menu: Menu) => void;
   onDeleteMenu: (menu: Menu) => void;
   onAddChild?: (parentMenu: Menu) => void;
-  expandedMenuIds?: Set<number>;
-  onToggleExpand?: (menuId: number) => void;
+  expandedMenuIds?: Set<string>;
+  onToggleExpand?: (menuId: string) => void;
   onMenuDrop?: (
-    draggedId: number,
-    targetId: number | null,
+    draggedId: string,
+    targetId: string | null,
     position: "before" | "after" | "inside"
   ) => void;
 }
